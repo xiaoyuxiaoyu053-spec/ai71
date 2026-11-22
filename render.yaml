@@ -1,0 +1,27 @@
+# Render Blueprint: New + → Blueprint → pick your repo.
+# Creates the web service AND a managed PostgreSQL database; DATABASE_URL is wired automatically.
+# All accounts, activation codes, announcements, themes, gallery and statistics live in that database.
+databases:
+  - name: linely-db
+    databaseName: linely
+    user: linely
+    plan: basic-256mb        # free-tier Postgres on Render expires after 30 days; use a paid plan for real users
+
+services:
+  - type: web
+    name: linely-web
+    runtime: node
+    plan: free
+    buildCommand: npm install --no-audit --no-fund
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        fromDatabase:
+          name: linely-db
+          property: connectionString
+      - key: LINELY_ADMIN_PASSWORD
+        sync: false
